@@ -1,210 +1,137 @@
-# Stego-Tool CLI
-
-Konsolidowany zestaw metod steganograficznych w jednym narzędziu wiersza poleceń.
-
----
-
-## Spis treści
-
-* [Opis](#opis)
-* [Wymagania](#wymagania)
-* [Instalacja](#instalacja)
-* [Struktura repozytorium](#struktura-repozytorium)
-* [Użycie](#uzycie)
-
-  * [PM1 (Hamming syndromy)](#pm1-hamming-syndromy)
-  * [Linguistic (steganografia lingwistyczna)](#linguistic-steganografia-lingwistyczna)
-  * [IP (nagłówki IPv4)](#ip-naglowki-ipv4)
-  * [Audio (WAV, parzystość grupowa)](#audio-wav-parzystosc-grupowa)
-  * [Simple LSB](#simple-lsb)
-  * [LSB Detection](#lsb-detection)
-* [Rozszerzenia i wkład](#rozszerzenia-i-wklad)
-* [Licencja](#licencja)
-
----
+**Steganografia - Wielofunkcyjne Narzędzie CLI**
 
 ## Opis
 
-`stego_cli.py` to wszechstronne narzędzie CLI integrujące różne techniki steganograficzne:
+Ten projekt to złożone narzędzie wiersza poleceń do ukrywania i wykrywania danych (stekanografii) w różnych nośnikach:
 
-* **PM1**: ukrywanie danych w najmniej znaczących bitach pikseli z minimalną korekcją wykorzystującą kody Hamminga.
-* **Linguistic**: steganografia lingwistyczna przez dobór synonimów i manipulację pierwszą literą słów lub zdań.
-* **IP**: kodowanie wiadomości w polu `id` nagłówka IPv4, wysyłane na interfejsie loopback.
-* **Audio**: ukrywanie bitów w parzystości grup próbek WAV (LSB parity).
-* **Simple LSB**: klasyczne podstawianie LSB w pikselach.
-* **LSB Detection**: detekcja śladów LSB w obrazie.
-
----
+* **IP Steganografia** (ukrywanie tekstów w polu `ID` i `TTL` pakietów IP)
+* **Steganografia lingwistyczna** (ukrywanie liter wiadomości poprzez dobór synonimów w tekście)
+* **Detekcja LSB** (analiza najmłodszego bitu obrazu)
+* **Metoda PM1** (ukrywanie danych w obrazie z korekcją Hamming)
+* **Prosta steganografia LSB** (ukrywanie tekstu bit-po-bicie w pikselach)
+* **Adaptacyjna steganografia RGB** (kodowanie danych w oparciu o lokalną wariancję obrazu)
+* **Steganografia audio** (ukrywanie wiadomości w plikach WAV przez parzystość grup próbek)
 
 ## Wymagania
 
-* Python 3.8+
-* Pakiety PIP:
+* Python 3.7+
+* Moduły Pythona:
 
-  ```bash
-  pip install numpy Pillow scapy
-  ```
-* (opcjonalnie) `sox` lub inny odtwarzacz WAV do testów audio
-
----
+  * `numpy`
+  * `opencv-python`
+  * `Pillow`
+  * `matplotlib`
+  * `scapy` (dla modułu IP Steganografia)
 
 ## Instalacja
 
 1. Sklonuj repozytorium:
 
    ```bash
-   git clone https://github.com/<użytkownik>/steganography.git
-   cd steganography
+   git clone https://github.com/makuszef/Steganography.git
+   cd Steganography
    ```
-2. (Opcjonalnie) utwórz i aktywuj wirtualne środowisko:
-
-   ```bash
-   python -m venv venv
-   source venv/bin/activate  # Linux/macOS
-   venv\Scripts\activate     # Windows
-   ```
-3. Zainstaluj zależności:
+2. Zainstaluj wymagane pakiety:
 
    ```bash
    pip install -r requirements.txt
    ```
 
----
+   *Jeżeli nie ma pliku `requirements.txt`, zainstaluj ręcznie:*
 
-## Struktura repozytorium
-
-```
-.
-├── adaptiveRGB.py       # (placeholder) adaptacyjne LSB w RGB
-├── Simple_LSB.py        # prosta LSB steganografia w obrazach
-├── LSBDetection.py      # detekcja LSB w obrazach
-├── modifiedPM1.py       # PM1 z kodami Hamminga
-├── linguistic_steg.py   # steganografia lingwistyczna
-├── ip_steg.py           # steganografia w nagłówkach IPv4
-├── audio_steg.py        # steganografia w plikach WAV
-├── stego_cli.py         # moduł CLI łączący wszystkie powyższe
-├── requirements.txt     # zależności Pythona
-└── README.md            # ten plik
-```
-
----
+   ```bash
+   pip install numpy opencv-python Pillow matplotlib scapy
+   ```
 
 ## Użycie
 
-Wszystkie komendy wywołujemy przez:
+Wszystkie funkcje dostępne są przez główny skrypt `steganography.py`. Wywołaj go z flagą odpowiadającą konkretnej metodzie.
+
+### IP Steganografia
 
 ```bash
-python stego_cli.py <podkomenda> [opcje]
+python steganography.py ip-steg send "Sekret" 192.168.1.10
+python steganography.py ip-steg receive --timeout 5
 ```
 
-### PM1 (Hamming syndromy)
+* **send**: wysyła wiadomość do podanego adresu IP.
+* **receive**: nasłuchuje pakietów na interfejsie loopback przez określony czas.
 
-* Ukrywanie wiadomości:
+### Steganografia lingwistyczna
 
-  ```bash
-  python stego_cli.py pm1 hide \
-    -i input.png \
-    -o output.png \
-    -m "Twoja tajna wiadomość" \
-    -r 3 \
-    -c 0
-  ```
-* Ekstrakcja:
+```bash
+python steganography.py linguistic hide tekst.txt wiadomosc.txt wynik.txt --lang pl
+python steganography.py linguistic extract wynik.txt --method auto
+```
 
-  ```bash
-  python stego_cli.py pm1 extract \
-    -i output.png \
-    -r 3 \
-    -c 0
-  ```
+* **hide**: ukrywa wiadomość z pliku w podanym tekście.
+* **extract**: wydobywa ukrytą wiadomość.
 
-### Linguistic (steganografia lingwistyczna)
+### Detekcja LSB
 
-* Ukrywanie:
+```bash
+python steganography.py lsb-detection --generate-test
+python steganography.py lsb-detection --image stego_image.png
+```
 
-  ```bash
-  python stego_cli.py linguistic hide \
-    -s source.txt \
-    -m "ukryta treść" \
-    --lang pl \
-    --method sentences
-  ```
-* Ekstrakcja:
+* **--generate-test**: tworzy dwa obrazy testowe (czysty i steganowany).
+* **--image**: analizuje wybraną warstwę bitową i wyświetla wykresy.
 
-  ```bash
-  python stego_cli.py linguistic extract \
-    -s modified.txt \
-    --method words
-  ```
+### Metoda PM1
 
-### IP (nagłówki IPv4)
+```bash
+python steganography.py pm1 hide obraz.png wiadomosc.txt stego.png --r 3 --channel 0
+python steganography.py pm1 extract stego.png --r 3 --channel 0
+```
 
-* Wysyłanie:
+* Pozwala ukrywać i wydobywać tekst w obrazie z korekcją Hamming.
 
-  ```bash
-  python stego_cli.py ip send \
-    -m "Więcej ram niż serca" \
-    -d 127.0.0.1
-  ```
-* Odbieranie:
+### Prosta steganografia LSB
 
-  ```bash
-  python stego_cli.py ip receive \
-    --timeout 5
-  ```
+```bash
+python steganography.py simple-lsb embed oryginal.png stego.png "Ukryty tekst"
+python steganography.py simple-lsb extract stego.png
+```
 
-### Audio (WAV, parzystość grupowa)
+* Dodatkowe komendy: `embedMax`, `variousChars`.
 
-* Kodowanie:
+### Adaptacyjna steganografia RGB
 
-  ```bash
-  python stego_cli.py audio encode \
-    -i input.wav \
-    -o stego.wav \
-    -m "Sekret w dźwięku"
-  ```
-* Dekodowanie:
+```bash
+python steganography.py adaptive-rgb encode nośnik.png sekret.bin wynik.png --max-mode
+python steganography.py adaptive-rgb decode wynik.png --output-file dane.bin
+```
 
-  ```bash
-  python stego_cli.py audio decode \
-    -i stego.wav
-  ```
+* Wariant max-mode powtarza dane, by wypełnić nośnik maksymalnie.
 
-### Simple LSB
+### Steganografia audio
 
-* Ukrywanie:
+```bash
+python steganography.py audio-steg encode input.wav wiadomosc.txt stego.wav --group-size 8
+python steganography.py audio-steg decode stego.wav --output-file odkryta.txt
+```
 
-  ```bash
-  python stego_cli.py simple_lsb hide \
-    -i input.png \
-    -o output.png \
-    -m "LSB secret" \
-    -c 2
-  ```
-* Ekstrakcja:
+* Ukrywanie tekstu w plikach WAV przez parzystość grup próbek.
 
-  ```bash
-  python stego_cli.py simple_lsb extract \
-    -i output.png \
-    -c 2
-  ```
+## Struktura katalogu
 
-### LSB Detection
+```
+Steganography/
+├── steganography.py   # Główny skrypt CLI
+├── ip_steg.py         # Moduł IP Steganografia
+├── Linguistic_steg.py # Moduł steganografia lingwistyczna
+├── LSBDetection.py    # Moduł detekcji LSB
+├── ModifiedPM1.py     # Moduł metody PM1
+├── Simple_LSB.py      # Prosta steganografia LSB
+├── adaptiveRGB.py     # Adaptacyjna steganografia RGB
+├── audio_steg.py      # Moduł steganografia audio
+└── README.md          # Dokumentacja
+```
 
-* Wykrywanie ingerencji LSB:
-
-  ```bash
-  python stego_cli.py lsb_detect \
-    -i input.png \
-    -c 0
-  ```
-
----
-Wszelkie pull requesty i zgłoszenia issue są mile widziane!
-
----
+Autor
+a------
+makuszef
 
 ## Licencja
 
-Ten projekt jest udostępniony na licencji MIT.
-See [LICENSE](LICENSE) for details.
+MIT License
