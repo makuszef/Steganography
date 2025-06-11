@@ -53,8 +53,8 @@ Konsolidowany zestaw metod steganograficznych w jednym narzędziu wiersza polece
 1. Sklonuj repozytorium:
 
    ```bash
-   git clone https://github.com/<użytkownik>/stego-tool.git
-   cd stego-tool
+   git clone https://github.com/<użytkownik>/steganography.git
+   cd steganography
    ```
 2. (Opcjonalnie) utwórz i aktywuj wirtualne środowisko:
 
