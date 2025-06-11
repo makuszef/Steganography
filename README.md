@@ -200,15 +200,6 @@ python stego_cli.py <podkomenda> [opcje]
   ```
 
 ---
-
-## Rozszerzenia i wkład
-
-* **Dodanie implementacji `adaptiveRGB`**
-* **Rozszerzenie słownika synonimów w `linguistic_steg.py`**
-* **Obsługa innych formatów audio (MP3, FLAC)**
-* **Interfejs webowy / GUI**
-* **Testy jednostkowe** (pytest)
-
 Wszelkie pull requesty i zgłoszenia issue są mile widziane!
 
 ---
